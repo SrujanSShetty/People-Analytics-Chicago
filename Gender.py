@@ -7,7 +7,7 @@ df = pd.read_excel('Merged Data\SORTED DATA SET.xlsx')  # Adjust the filename/pa
 # Initialize the gender detector
 detector = gender.Detector()
 
-# Assuming the column with names is called 'Name' — change if your column is different
+# Assuming the column with names is called 'fullName' — change if your column is different
 df['Gender'] = df['fullName'].apply(lambda x: detector.get_gender(x.split()[0]))
 
 # Optional: Simplify the result (e.g., male/female only)
