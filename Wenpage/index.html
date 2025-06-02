@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Chris's AI-Powered People Analytics Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <video autoplay muted loop id="bg-video">
+    <source src="background.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+  <div id="content">
+    <h1>Chris's People Analytics Dashboard</h1>
+    <iframe src="YOUR_POWER_BI_EMBED_LINK_HERE" allowfullscreen></iframe>
+    <div id="chat-container">
+      <h2>Ask the AI</h2>
+      <input type="text" id="userPrompt" placeholder="Ask something like: Show people from Chicago with 5+ years experience...">
+      <button onclick="askAI()">Ask</button>
+      <pre id="aiResponse"></pre>
+    </div>
+  </div>
+  <script src="main.js"></script>
+</body>
+</html>
