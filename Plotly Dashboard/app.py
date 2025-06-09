@@ -4,11 +4,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-#load data
+# Load data
 excel_path = "Plotly Dashboard/Dataset.xlsx"
 df = pd.read_excel(excel_path)
 
-#Rename column for easier access
+# Rename column for easier access
 if 'Experience(Years)' in df.columns:
     df.rename(columns={'Experience(Years)': 'Experience'}, inplace=True)
 
@@ -30,21 +30,20 @@ app.layout = html.Div([
     
     html.Div([
         html.Div([ 
-                  html.Img(src="Plotly Dashboard/assets/poster1.jpg.jpeg",style={"width": "300px", "marginRight": "10px"}),
-                  html.Img(src="Plotly Dashboard/assets/poster2.jpg.jpeg",style={"width": "300px", "marginLeft": "10px"}),
-                  html.Img(src="Plotly Dashboard/assets/poster3.jpg.jpeg",style={"width": "300px"}),
+            html.Img(src="/assets/poster1.jpg.jpeg", style={"width": "300px", "marginRight": "10px"}),
+            html.Img(src="/assets/poster2.jpg.jpeg", style={"width": "300px", "marginLeft": "10px"}),
+            html.Img(src="/assets/poster3.jpg.jpeg", style={"width": "300px"}),
         ], style={"display": "flex", "overflowX": "scroll", "margin": "20px auto"})
     ], style={"textAlign": "center"}),
     
     html.Div([
-        html.Img(src="Plotly Dashboard/assets/logo.png", style= {"height": "80px"})
-    ], style={"textAlign": "center", "margin": 20})
+        html.Img(src="/assets/logo.png", style={"height": "80px"})
+    ], style={"textAlign": "center", "margin": 20}),
     
-    dcc.Graph(id="world-map") 
+    dcc.Graph(id="world-map")
+])
 
- ])
-
-# Callback to update the average experience text
+# Callback to update the figures
 @app.callback(
     Output("gender-donut", "figure"),
     Output("headcount-gauge", "figure"),
@@ -58,7 +57,6 @@ app.layout = html.Div([
     Input("world-map", "clickData")
 )
 def update_graphs(gender_click, headcount_click, domain_click, avg_exp, world_click):
-    # Create the figures based on the click data
     gender_fig = px.pie(df, names='Gender', values='Count', title='Gender Distribution')
     headcount_fig = go.Figure(go.Indicator(
         mode="gauge+number",
@@ -69,8 +67,7 @@ def update_graphs(gender_click, headcount_click, domain_click, avg_exp, world_cl
     domain_fig = px.pie(df, names='Domain', values='Count', title='Domain Distribution')
     avg_exp_text = f"Average Experience: {df['Experience'].mean():.1f} years"
     world_map_fig = px.choropleth(df, locations="Country", locationmode="country names",
-                                    color="Count", hover_name="Country", title="World Map")
-
+                                  color="Count", hover_name="Country", title="World Map")
     return gender_fig, headcount_fig, domain_fig, avg_exp_text, world_map_fig
 
 if __name__ == '__main__':
