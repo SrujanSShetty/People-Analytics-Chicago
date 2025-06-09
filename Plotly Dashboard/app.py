@@ -95,4 +95,4 @@ def update_dashboard(gender_click, domain_click, map_click):
     return donut, gauge, pie, avg_exp, map_fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
