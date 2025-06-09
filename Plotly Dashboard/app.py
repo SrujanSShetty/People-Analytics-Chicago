@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pandas as pd
 
 # Load data
-excel_path = "Plotly Dashboard/Dataset.xlsx"
+excel_path = "Dataset.xlsx"
 df = pd.read_excel(excel_path)
 
 # Rename column for easier access
@@ -71,4 +71,4 @@ def update_graphs(gender_click, headcount_click, domain_click, avg_exp, world_cl
     return gender_fig, headcount_fig, domain_fig, avg_exp_text, world_map_fig
 
 if __name__ == '__main__':
-    app.run_server(debug=True)
+    app.run(debug=True)
