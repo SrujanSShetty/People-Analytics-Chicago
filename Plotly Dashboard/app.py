@@ -5,7 +5,7 @@ import plotly.graph_objects as go
 import pandas as pd
 
 # Load data
-excel_path = "Plotly Dashboard/Dataset.xlsx"
+excel_path = "Plotly Dashboard/Dataset.xlsx"  # Update with your Excel file path
 df = pd.read_excel(excel_path)
 
 # Rename column for easier access
