@@ -4,9 +4,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
 
-# Load dataset from Excel file
-excel_path = "Dataset.xlsx"
-df = pd.read_excel(excel_path)
+# Load enhanced dataset with lat/lon
+df = pd.read_excel("Dataset_with_coords.xlsx")
 
 if 'Experience (Years)' in df.columns:
     df.rename(columns={'Experience (Years)': 'Experience'}, inplace=True)
@@ -17,28 +16,51 @@ app.title = "People Analytics Dashboard"
 app.layout = html.Div([
     html.H1("People Analytics Dashboard", style={"textAlign": "center"}),
 
+    dcc.Store(id="filter-store", data={"gender": None, "domain": None, "location": None}),
+
+    html.Button("Reset Filters", id="reset-button", n_clicks=0, style={"margin": "10px auto", "display": "block"}),
+
     html.Div([
         dcc.Graph(id="gender-donut"),
         dcc.Graph(id="headcount-gauge"),
         dcc.Graph(id="domain-pie")
-    ], style={"display": "flex", "justifyContent": "space-around"}),
+    ], style={"display": "flex", "justifyContent": "space-around", "flexWrap": "wrap"}),
 
     html.Div(id="avg-experience", style={"textAlign": "center", "fontSize": 24, "marginTop": 20}),
-
-    html.Div([
-        html.Div([
-            html.Img(src="/assets/poster1.jpg", style={"width": "300px", "marginRight": "10px"}),
-            html.Img(src="/assets/poster2.jpg", style={"width": "300px", "marginRight": "10px"}),
-            html.Img(src="/assets/poster3.jpg", style={"width": "300px"}),
-        ], style={"display": "flex", "overflowX": "scroll", "margin": "20px auto"})
-    ], style={"textAlign": "center"}),
 
     html.Div([
         html.Img(src="/assets/logo.png", style={"height": "80px"})
     ], style={"textAlign": "center", "marginBottom": 20}),
 
-    dcc.Graph(id="world-map")
+    dcc.Graph(id="world-map", style={"height": "600px", "marginTop": 20}),
 ])
+
+@app.callback(
+    Output("filter-store", "data"),
+    Input("gender-donut", "clickData"),
+    Input("domain-pie", "clickData"),
+    Input("world-map", "clickData"),
+    Input("reset-button", "n_clicks"),
+    State("filter-store", "data"),
+    prevent_initial_call=True
+)
+def update_filter_store(gender_click, domain_click, map_click, reset_clicks, current_filters):
+    ctx = dash.callback_context
+    if not ctx.triggered:
+        return current_filters
+    trigger_id = ctx.triggered[0]['prop_id'].split('.')[0]
+
+    if trigger_id == "reset-button":
+        return {"gender": None, "domain": None, "location": None}
+
+    if gender_click and gender_click.get("points"):
+        current_filters["gender"] = gender_click["points"][0]["label"]
+    if domain_click and domain_click.get("points"):
+        current_filters["domain"] = domain_click["points"][0]["label"]
+    if map_click and map_click.get("points"):
+        current_filters["location"] = map_click["points"][0]["hovertext"]
+
+    return current_filters
 
 @app.callback(
     Output("gender-donut", "figure"),
@@ -46,51 +68,37 @@ app.layout = html.Div([
     Output("domain-pie", "figure"),
     Output("avg-experience", "children"),
     Output("world-map", "figure"),
-    Input("gender-donut", "clickData"),
-    Input("domain-pie", "clickData"),
-    Input("world-map", "clickData"),
-    prevent_initial_call=True
+    Input("filter-store", "data")
 )
-def update_dashboard(gender_click, domain_click, map_click):
-    selected_gender = None
-    selected_domain = None
-    selected_location = None
-
-    if gender_click and gender_click.get("points"):
-        selected_gender = gender_click["points"][0]["label"]
-
-    if domain_click and domain_click.get("points"):
-        selected_domain = domain_click["points"][0]["label"]
-
-    if map_click and map_click.get("points"):
-        selected_location = map_click["points"][0]["location"]
-
+def update_dashboard(filters):
     dff = df.copy()
-
-    if selected_gender:
-        dff = dff[dff["Gender"] == selected_gender]
-    if selected_domain:
-        dff = dff[dff["Domain"] == selected_domain]
-    if selected_location:
-        dff = dff[dff["Location"] == selected_location]
+    if filters["gender"]:
+        dff = dff[dff["Gender"] == filters["gender"]]
+    if filters["domain"]:
+        dff = dff[dff["Domain"] == filters["domain"]]
+    if filters["location"]:
+        dff = dff[dff["Location"] == filters["location"]]
 
     donut = px.pie(dff, names="Gender", hole=0.4, title="Gender Distribution")
+    pie = px.pie(dff, names="Domain", title="Domain Breakdown")
     gauge = go.Figure(go.Indicator(
         mode="gauge+number",
         value=len(dff),
         title={"text": "Headcount"},
         gauge={"axis": {"range": [0, len(df)]}}
     ))
-    pie = px.pie(dff, names="Domain", title="Domain Breakdown")
     avg_exp = f"Average Experience (Years): {dff['Experience'].mean():.2f}" if not dff.empty else "No data for selection"
 
     map_fig = px.scatter_geo(
         dff,
-        locations="Location",
-        locationmode="country names",
+        lat='Latitude',
+        lon='Longitude',
+        text="Location",
+        color='Domain',
         title="Geographic Distribution",
         projection="natural earth"
     )
+    map_fig.update_traces(marker=dict(size=8, line=dict(width=1, color='white')))
 
     return donut, gauge, pie, avg_exp, map_fig
 
